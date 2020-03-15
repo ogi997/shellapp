@@ -9,7 +9,6 @@
 #include<algorithm>
 //srediti ove includ
 
-
 /*
 Author: Ognjen
 Project: OOS Project Shell app
@@ -18,8 +17,6 @@ Version: 2.0
 bug
     kod prvog pokretanja dva puta ispisuje ime korisnika
     out_of_range izuzetak kod naredbi koje primaju argumente
-
-
 
 */
 using namespace usr;
@@ -45,8 +42,6 @@ int main(){
         std::cout<<user.getName()<<"@ "; //ima bug dva puta se ispisuje
         std::getline(std::cin,cmd); //zbog ovog vj
         parseCmd = parsing::parse(cmd);
-
-
 
 
         if(parseCmd.size() != 0){
