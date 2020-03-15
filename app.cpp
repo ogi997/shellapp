@@ -200,7 +200,7 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 
 //pomocna funkcija
 void tree(std::string path, const int root){
-    int i;
+
     std::string newPath;
     struct dirent* dp;
     DIR* dir = opendir(path.c_str());
@@ -209,7 +209,7 @@ void tree(std::string path, const int root){
 
     while((dp = readdir(dir)) != NULL){
         if(strcmp(dp->d_name,".") != 0 && strcmp(dp->d_name,"..") != 0){
-            for(i = 0; i<root; i++){
+            for(int i = 0; i<root; i++){
                 if(i % 2 == 0 || i == 0)
                     std::cout<<"";
                 else
@@ -283,6 +283,33 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
     }
 }
 
+//pomocna funkcija
+
+void search(std::string path, std::string key){
+
+    std::string newPath;
+    struct dirent* dp;
+    DIR* dir = opendir(path.c_str());
+    if(!dir)
+        return;
+
+    while((dp = readdir(dir)) != NULL){
+        if(strcmp(dp->d_name,".") != 0 && strcmp(dp->d_name,"..") != 0){
+            if(dp->d_name == key){
+             //   std::cout<<"Pronadjeno\n";
+                std::cout<<path<<"\n";
+            }
+
+           // std::cout<<" "<<dp->d_name<<"\n";
+            newPath = path + "/" + dp->d_name;
+            search(newPath, key);
+        }
+    }
+}
+
+
+
+
 void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
 //findDat datoteka putanja
 //pretrazuje stablo gdje je root putanja dok ne nadje datoteku
@@ -292,6 +319,22 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
 direktorijume i samo provjeravamo ukoliko postoji
 taj fajl stampaj ga na konzolu i tjt
 */
+
+    //sredi ove if koristi c++
+    if(parseCmd.size() > 3){
+        std::cout<<"Previse argumenata\n";
+        return;
+    }
+
+    if(parseCmd.size() < 3){
+        std::cout<<"findDat datoteka putanja\n";
+        return;
+    }
+
+    std::string path = parseCmd.at(2);
+    std::string file = parseCmd.at(1);
+    search(path,file);
+
 }
 
 void cmd::Command::logout(usr::User& user){
