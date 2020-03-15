@@ -43,9 +43,9 @@
 
  }
 
- //void User::setLogged(bool logged){
-  //  this->logged = logged;
-// }
+ void User::setLogged(bool logged){
+    this->logged = logged;
+ }
 void User::setPath(std::string& path){
     this->path = path;
 }

@@ -10,7 +10,7 @@ int main(){
 
   
     User user; //korisnik
-    std::string cmd;
+    std::string cmd; //komanda koju unosi
     std::vector<std::string> parseCmd;
 
     bool check = false;
@@ -123,24 +123,47 @@ int main(){
             }else if(parseCmd.front() == "find"){
                 //find "tekst" datoteka
                 //pretrazuje sadrzaj datoteka u odnosu na zadati tekst
-                //
+                std::string search = parseCmd.at(1); //tekst koji trazimo
+                std::string line;
+                std::ifstream file;
+                file.open(parseCmd.at(2).c_str());
+                if(!file){
+                    //fajl nije otvoren
+                    //rijesi preko try catch
+                    std::cout<<"Fajl ne postoji\n";
+                }
+                int pos;
+                while(file.good()){
+                    getline(file,line);
+                    pos = line.find(search.c_str());
+                    if(pos!=std::string::npos){
+                        std::cout<<"Pronadjeno\n"<<" na "<<pos<<"\n";
+                        break; //popravi i ovaj break za sada samo nek prekine rad
+                    }
+                }
 
             }else if(parseCmd.front() =="findDat"){
                 //findDat datoteka putanja
-                //pretrazuje stablo dok ne nadje datoteku
+                //pretrazuje stablo gdje je root putanja dok ne nadje datoteku
                 //skontaj sta ova naredba treba radi uopste
+
+                /* ideja je da pretrazimo sve 
+                    direktorijume i samo provjeravamo ukoliko postoji
+                    taj fajl stampaj ga na konzolu i tjt
+
+                */
+
+
+            }else if(parseCmd.front() == "logout"){
+                user.setLogged(false);
+                std::cout<<user.getName()<<" se odjavljuje\n";
+                sleep(2);
             }else{
                 std::cout<<"Unijeli ste nepostojecu komandu\n";
             }
         }
         
     }
-
-
-
-
-
-    
 
 return 0;
 }

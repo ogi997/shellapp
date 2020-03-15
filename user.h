@@ -11,7 +11,7 @@ private:
    // bool checkDataBase();
 public:
     bool login();
-   // void setLogged(bool logged);
+    void setLogged(bool logged);
     bool getLogged();
     std::string& getName();
     std::string& getPassword();
