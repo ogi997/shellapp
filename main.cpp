@@ -12,10 +12,9 @@
 /*
 Author: Ognjen
 Project: OOS Project Shell app
-Version: 2.0
+Version: 3.0
 
 bug
-    kod prvog pokretanja dva puta ispisuje ime korisnika
     out_of_range izuzetak kod naredbi koje primaju argumente
 
 */
@@ -23,12 +22,45 @@ using namespace usr;
 
 int main(){
 
-  
+    clearr();
+
     User user; //korisnik
+    user.setLogged(false); //postavljamo korisnika na offline (probaj preko konstruktora da rijesis ovo)
     std::string cmd; //komanda koju unosi
     std::vector<std::string> parseCmd;
-    std::vector<std::string> commands = {"where", "go", "create", "list", "print", "find", "findDat", "logout"};
+    std::vector<std::string> commands = {"login", "where", "go", "create", "list", "print", "find", "findDat", "logout"}; //moguce komande
     std::vector<std::string>::iterator it;
+
+    bool check = true;
+    while(check){
+        //std::cout<<"prijava "<<user.getLogged()<<"\n\n";
+        if(user.getLogged() == false)
+            std::cout<<"shellapp> ";
+        else
+            std::cout<<user.getName()<<"$~ ";
+
+        std::getline(std::cin, cmd);
+        parseCmd = parsing::parse(cmd);
+        if(parseCmd.size() != 0){
+            it = find(commands.begin(), commands.end(), parseCmd.front());
+            if(it != commands.end()){
+                //std::cout<<"Komanda postoji\n";
+
+                user.execute(parseCmd, user);
+
+            }else {
+                std::cout<<"Naredba "<<parseCmd.front()<<" ne postoji!\n";
+            }
+        }
+    }
+
+
+
+
+
+
+
+/*
 
     bool check = false;
     do{
@@ -58,6 +90,8 @@ int main(){
         }
         
     }
+
+    */
 
 return 0;
 }

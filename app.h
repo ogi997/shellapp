@@ -1,6 +1,8 @@
 #include<string>
 #include<vector>
 
+void clearr();
+
 namespace usr{
 
     class User{
@@ -13,6 +15,8 @@ namespace usr{
 
        // bool checkDataBase();
     public:
+        //konstruktor
+
         bool login();
         void setLogged(bool logged);
         bool getLogged();
@@ -32,6 +36,7 @@ namespace cmd {
     
     class Command {
     public:
+        //bool login(std::vector<std::string>& parseCmd, usr::User& user);
         //za sada sve void
         void where(std::vector<std::string>& parseCmd,usr::User& user);
         void go(std::vector<std::string>& parseCmd, usr::User& user);

@@ -7,9 +7,22 @@
 #include<dirent.h>
 #include<sys/types.h>
 #include<cstring>
+
+
+//pomocna funkcija
+
+void clearr(){
+    system("clear"); //naci alternativu za ovo
+}
+
+
 //namespace usr
 
-bool usr::User::login(){
+bool usr::User::login(/*std::vector<std::string>& parseCmd, usr::User& user*/){
+    
+    clearr();
+    
+
     std::string ime;
     std::string lozinka;
 
@@ -51,6 +64,14 @@ bool usr::User::login(){
             this->path = cwd;// sacuvali smo putanju
         }
         //this->path = "/home/"+ime;
+
+        std::cin.ignore(100, '\n');//cistim bafer
+
+        //cisti ekran
+        sleep(2);
+        clearr();
+
+
         return true;
     }else{
         std::cout<<"Vase korisnicko ime ili lozinka su netacni\n";
@@ -64,6 +85,19 @@ void usr::User::execute(std::vector<std::string>& parseCmd, usr::User& user){
 //smisliti neki bolji nacin za ovo
     cmd::Command comm; //objekat u kome se izvode operacije
     
+    if(parseCmd.front() == "login"){
+        
+        std::cout<<"Naredba login\n";
+        
+        if(user.getLogged()){
+            std::cout<<" Prijavljeni ste na sistem. Odjavite se pomocu logout\n";
+            return;
+        }
+        
+        user.login();
+    }
+
+
     if(parseCmd.front() == "where"){
         std::cout<<"Naredba where\n";
         comm.where(parseCmd, user);
@@ -141,7 +175,16 @@ void usr::User::setPassword(std::string& password){
 //namespace cmd
 
 void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
-//where - pokazuje trenutno    
+//where - pokazuje trenutno
+
+
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
+
     if(parseCmd.size() > 1){
         std::cout<<"Komanda where nema argmente\n";
     }else{
@@ -151,6 +194,13 @@ void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
 
 void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
 //go putanja - mijenja tekuci direktorijum korisnika. 
+    
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
     if(parseCmd.size() == 1){
         std::cout<<"go putanja\n";
     }
@@ -176,6 +226,12 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 //[-d] putanja ako ima -d ide direktorijum
 //ako ga nema onda neka datoteka
 //ako nema putanje kreira u tom folderu u kom se nalazi
+
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
 
     if(parseCmd.size() == 1){
         std::cout<<"create [-d] putanja\n";
@@ -227,6 +283,13 @@ void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
 //list [putanja]
 //izlistava sadrzaj direktorijuma na zadatoj putanji
 //ako nema putanje onda samo sadrzaj tekuceg direktorijuma
+  
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
   if(parseCmd.size() == 2){
     //ima putanja nju treba izlistati
     std::string path = parseCmd.at(1);
@@ -245,6 +308,14 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
 //print datoteka
 //ispisuje sadrzaj tekstualne datoteke na konzolu
 //ako nije tekstualna ispisati odgovarajucu poruku
+
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
+
     if(parseCmd.size() == 1){
         std::cout<<"Komanda nema dovoljno argumenata\n"<<"print datoteka";
     }
@@ -262,6 +333,13 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
 void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
 //find "tekst" datoteka
 //pretrazuje sadrzaj datoteka u odnosu na zadati tekst
+
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
     std::string search = parseCmd.at(1); //tekst koji trazimo
     std::string line;
     std::ifstream file;
@@ -320,6 +398,12 @@ direktorijume i samo provjeravamo ukoliko postoji
 taj fajl stampaj ga na konzolu i tjt
 */
 
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
     //sredi ove if koristi c++
     if(parseCmd.size() > 3){
         std::cout<<"Previse argumenata\n";
@@ -338,6 +422,13 @@ taj fajl stampaj ga na konzolu i tjt
 }
 
 void cmd::Command::logout(usr::User& user){
+
+    if(!user.getLogged()){
+        std::cout<<" Niste prijavljeni\n";
+        return;
+    }
+
+
     user.setLogged(false);
     std::cout<<user.getName()<<" se odjavljuje\n";
     sleep(2);
