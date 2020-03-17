@@ -16,8 +16,9 @@ namespace usr{
        // bool checkDataBase();
     public:
         //konstruktor
+        User(){this->logged = false;}
 
-        bool login();
+        void login();
         void setLogged(bool logged);
         bool getLogged();
         std::string& getName();
