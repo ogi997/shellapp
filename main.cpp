@@ -12,10 +12,36 @@
 /*
 Author: Ognjen
 Project: OOS Project Shell app
-Version: 3.0
+Version: 4.0
 
-bug
+makeup:
+    pri unosu lozinki da se pojavljuju *
+
+potencijalni bug:
+    otvaranje fajla preko konstruktora (std::ifstream file(putanja) ) da li ce da uhvati izuzetak try catch
+    ako do njega dodje?
+        trebalo bi da je rjeseno sa if(!file) throw std::runtime_error() i izuzetak std::exception ce da uhvati gresku
+        potrebno testirati
+
+bug:
     out_of_range izuzetak kod naredbi koje primaju argumente
+        rijeseno - potrebno testirati
+    
+    login prijava korisnika koji nije registrovan na Linux OS (ne postoji njegov direktorijum u /home)
+    
+    create - kada se kreira datoteka, provjeriti da li je kreirana (ne file.is_open()) u slucaju da datoteka
+    postoji otvorice je i ispisace poruku da je datoteka kreirana a nije treba poruka tipa vec postoji datoteka
+    pod tim nazivom
+    moguce rjesenje:
+        ofstream se koristi za kreiranje i pisanje
+        ifstream za citanje iz fajla
+        fstream radi sve sto i prethodna dva
+        ideja: kreirati std::ofstream i std::ifstream objekte pokusati citati iz datoteke ukoliko je moguce
+        fajl postoji i ne moze se kreirati, ukoliko nije moguce citati kreirati dati fajl. moguce uopste?????? efikasno???
+
+    list, print, find, findDat ne ispisuje odgovarajucu poruku pri pogresnim putanjama
+        print i find rijeseno - testirati
+
 
 */
 int main(){
