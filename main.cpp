@@ -12,14 +12,15 @@
 /*
 Author: Ognjen
 Project: OOS Project Shell app
+OS: Linux Ubuntu
 Version: 4.0
 
 makeup:
-    pri unosu lozinki da se pojavljuju *
+    pri unosu lozinki da se pojavljuju * (pozeljno)
 
 potencijalni bug:
     otvaranje fajla preko konstruktora (std::ifstream file(putanja) ) da li ce da uhvati izuzetak try catch
-    ako do njega dodje?
+    ako do njega dodje? potrebno baciti izuzetak i uhvatiti ga sa std::exception
         trebalo bi da je rjeseno sa if(!file) throw std::runtime_error() i izuzetak std::exception ce da uhvati gresku
         potrebno testirati
 
@@ -38,10 +39,14 @@ bug:
         fstream radi sve sto i prethodna dva
         ideja: kreirati std::ofstream i std::ifstream objekte pokusati citati iz datoteke ukoliko je moguce
         fajl postoji i ne moze se kreirati, ukoliko nije moguce citati kreirati dati fajl. moguce uopste?????? efikasno???
+        rijeseno potrebno testirati
 
     list, print, find, findDat ne ispisuje odgovarajucu poruku pri pogresnim putanjama
         print i find rijeseno - testirati
+        rijeseno potrebno testirati
 
+Izvrsiti testiranje shell aplikacije!
+testirati gresku pri otvaranju baza.txt
 
 */
 int main(){
@@ -67,7 +72,7 @@ int main(){
         std::getline(std::cin, cmd);
         parseCmd = parsing::parse(cmd);
 
-        if(parseCmd.size() != 0){
+        if(parseCmd.size() != 0){//ukoliko ste stisne enter (prazan unos) trazice ponovni unos (nece doci do izvrsenja nikakvih komandi)
             it = find(commands.begin(), commands.end(), parseCmd.front());
             if(it != commands.end())
                 user.execute(parseCmd, user);

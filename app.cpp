@@ -9,13 +9,33 @@
 #include<cstring>
 #include<stdexcept> //exception kao i std::out_of_range
 
+//pomocne globalne promjenjive
+
+static short count; 
+
 //pomocna funkcija
 
 void clearr(){
     system("clear"); //naci alternativu za ovo
 }
 
-void tree(std::string path, const int root){
+
+void validPath(std::string& path){
+      struct stat myFile;
+    if(stat(path.c_str(), &myFile) < 0){
+        std::cout<<" Putanja ne postoji!\n";
+    }else if(!S_ISDIR(myFile.st_mode)){
+        std::cout<<" Putanja nije direktorijum!\n";
+    }
+}
+
+void tree(std::string& path, const int root){
+    //provjera validnosti putanje
+    if(!count)
+        validPath(path);
+    count++;
+
+
 
     std::string newPath;
     struct dirent* dp;
@@ -39,7 +59,12 @@ void tree(std::string path, const int root){
     }
 }
 
-void search(std::string path, std::string key){
+void search(std::string& path, std::string& key){
+    //validacija putanje
+    if(!count)
+        validPath(path);
+    count++;
+
 
     std::string newPath;
     struct dirent* dp;
@@ -85,36 +110,42 @@ void usr::User::login(){
             }
         }
     }catch(const std::ifstream::failure& e){
-        std::cout<<" Greska sa bazom podataka\n";
+        std::cout<<" Greska sa bazom podataka!\n";
     }
     
     file.close();
     
     if(found){
 
-        this->logged = true;
-        std::cout<<" Uspjesno ste se prijavili na sistem\n";
-        this->setName(ime);
-        this->setPassword(lozinka);
         std::string putanja = "/home/"+ime;
         int check = chdir(putanja.c_str());
 
         /*ovdje moze doci do greske, recimo da korisnik postoji i loguje se a njegov folder
-        se ne nalazi u /home/ direktorijumu*/
+        se ne nalazi u /home/ direktorijumu  -- else bi trebao da sprijeci testirati*/
         if(!check){
             char cwd[1024];
             getcwd(cwd,sizeof(cwd));
             this->path = cwd;
+        }else{
+            std::cout<<" Korisnik "<<ime<<" nije sistemski registrovan na Linux OS.\n";
+            return;
         }
 
-        std::cin.ignore(100, '\n');//cisti bafer
+
+        this->logged = true;
+        this->setName(ime);
+        this->setPassword(lozinka);
+        
+        std::cout<<" Uspjesno ste se prijavili na sistem.\n";
+
+        std::cin.ignore(100, '\n');//cisti bafer - poslije std::cin ostaje enter za svaki slucaj 100 karaktera nek obrise
 
         //cisti ekran
         sleep(1);
         clearr();
 
     }else{
-        std::cout<<" Vase korisnicko ime ili lozinka su netacni\n";
+        std::cout<<" Vase korisnicko ime ili lozinka su netacni!\n";
     }
 
 }
@@ -126,7 +157,7 @@ void usr::User::execute(std::vector<std::string>& parseCmd, usr::User& user){
     if(!parseCmd.front().compare("login")){
         
         if(user.getLogged()){
-            std::cout<<" Prijavljeni ste na sistem. Odjavite se pomocu logout\n";
+            std::cout<<" Prijavljeni ste na sistem. Odjavite se pomocu logout.\n";
             return;
         }
         
@@ -140,12 +171,14 @@ void usr::User::execute(std::vector<std::string>& parseCmd, usr::User& user){
     }else if(!parseCmd.front().compare("create")){
         comm.create(parseCmd, user);
     }else if(!parseCmd.front().compare("list")){
+        count = 0; //vezano za validaciju putanje
         comm.list(parseCmd, user);
     }else if(!parseCmd.front().compare("print")){
         comm.print(parseCmd, user);
     }else if(!parseCmd.front().compare("find")){
         comm.find(parseCmd, user);
     }else if(!parseCmd.front().compare("findDat")){
+        count = 0; //vezano za validaciju putanje
         comm.findDat(parseCmd, user);
     }else 
         if(!parseCmd.front().compare("logout")){
@@ -192,12 +225,12 @@ void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
 //where - pokazuje trenutno
 
     if(!user.getLogged()){
-        std::cout<<" Niste prijavljeni\n";
+        std::cout<<" Niste prijavljeni!\n";
         return;
     }
 
     if(parseCmd.size() > 1){
-        std::cout<<" Komanda where nema argmente\n Ispravan unos: where\n";
+        std::cout<<" Komanda where nema argmente\n Ispravan unos: where.\n";
         return;
     }
 
@@ -208,19 +241,19 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
 //go putanja - mijenja tekuci direktorijum korisnika. 
     
     if(!user.getLogged()){
-        std::cout<<" Niste prijavljeni\n";
+        std::cout<<" Niste prijavljeni!\n";
         return;
     }
 
     if(parseCmd.size() > 2){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: go putanja\n";
+        std::cout<<" Ispravan unos: go putanja!\n";
         return;
     }
     std::string newDir;
     try{
         newDir = parseCmd.at(1); //moguce out_of_range
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: go putanja\n";
+        std::cout<<" Ispravan unos: go putanja.\n";
         return;
     }
 
@@ -231,8 +264,9 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
         getcwd(cwd, sizeof(cwd)); //funkcija prima char*
         std::string newPath = cwd;
         user.setPath(newPath);
+        std::cout<<" Komanda uspjesno izvrsena.\n";
     }else{
-        std::cout<<" Unijeta putanja ne postoji\n";
+        std::cout<<" Unijeta putanja ne postoji!\n";
     }
 
 }
@@ -243,12 +277,12 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 //ako nema putanje kreira u tom folderu u kom se nalazi
 
     if(!user.getLogged()){
-        std::cout<<" Niste prijavljeni\n";
+        std::cout<<" Niste prijavljeni!\n";
         return;
     }
 
     if(parseCmd.size() > 3){ //u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: create [-d] putanja\n";
+        std::cout<<" Ispravan unos: create [-d] putanja!\n";
         return;
     }
 
@@ -257,7 +291,7 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
     try{
         opcion = parseCmd.at(1); //moguce out_of_range
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: create [-d] putanja\n";
+        std::cout<<" Ispravan unos: create [-d] putanja!\n";
         return;
     }
     
@@ -266,29 +300,37 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
         try{
             path = parseCmd.at(2); //moguce out_of_range
         }catch(const std::out_of_range& oor){
-            std::cout<<" Ispravan unos: create [-d] putanja\n";
+            std::cout<<" Ispravan unos: create [-d] putanja!\n";
             return;
         }
-        int check = mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(!check){
-            std::cout<<" Direktorijum je kreiran\n";
+            std::cout<<" Direktorijum je kreiran.\n";
             return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
         }else{
-            std::cout<<" Direktorijum nije kreiran.\n Ispravan unos: create [-d] putanja\n";
+            std::cout<<" Direktorijum nije kreiran.\n Ispravan unos: create [-d] putanja.\n";
             return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
         }
     }
 
     try{
         std::string path = parseCmd.at(1); //moguce out_of_range
-        std::ofstream file (path.c_str()); //moguce ne otvaranje datoteke
-        if(file.is_open()) //ovdje bag objasnjeno pod bug u main.cpp
-            std::cout<<" Datoteka je kreirana\n";
+        std::ifstream file(path.c_str());
+        if(!file.is_open()){
+            std::ofstream newFile(path.c_str());
+            if(!newFile)
+                std::runtime_error(" Datoteka nije kreirana.\n Ispravan unos: create [-d] putanja.\n");
+            else
+                std::cout<<" Datoteka je kreirana.\n";
+        }else{
+            std::cout<<" Datoteka sa tim imenom vec postoji u direktorijumu!\n";
+        }
     }catch(const std::out_of_range& oor){
         std::cout<<" Ispravan unos: create [-d] putanja\n";
         return;
-    }catch(const std::ifstream::failure& e){
-        std::cout<<" Datoteka nije kreirana\n Ispravan unos: create [-d] putanja\n";
+    }catch(const std::exception& e){
+        //std::cout<<" Datoteka nije kreirana\n Ispravan unos: create [-d] putanja\n";
+        std::cout<<e.what();
         return;
     }
 
