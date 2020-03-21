@@ -100,20 +100,28 @@ void usr::User::login(){
     std::string userAndPass = ime + " " + lozinka;
     bool found = false;
 
-    std::ifstream file;
+    //std::ifstream file;
     std::string line;
     try{
-        file.open("baza.txt"); //moguca greska pri otvaranju datoteke baza.txt
+        //file.open("bazaa.txt"); //moguca greska pri otvaranju datoteke baza.txt
+       std::ifstream file("bazaaa.txt");
+        if(!file)
+            throw std::runtime_error(" Greska sa bazom podataka!\n Pokusajte kasnije.\n");
+
         while(getline(file,line) && !found){
             if(!line.compare(userAndPass)){
                 found = true;
             }
         }
-    }catch(const std::ifstream::failure& e){
-        std::cout<<" Greska sa bazom podataka!\n";
+        file.close();
+    }catch(const std::exception& e){
+        //std::cout<<" Greska sa bazom podataka!\n";
+        std::cout<<e.what();
+        std::cin.ignore(100, '\n'); //ciscenje bafera
+        return;
     }
     
-    file.close();
+    //file.close();
     
     if(found){
 
@@ -128,6 +136,7 @@ void usr::User::login(){
             this->path = cwd;
         }else{
             std::cout<<" Korisnik "<<ime<<" nije sistemski registrovan na Linux OS.\n";
+            std::cin.ignore(100, '\n');
             return;
         }
 
@@ -146,6 +155,7 @@ void usr::User::login(){
 
     }else{
         std::cout<<" Vase korisnicko ime ili lozinka su netacni!\n";
+        std::cin.ignore(100, '\n');
     }
 
 }
@@ -313,8 +323,11 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
         }
     }
 
+
+
     try{
         std::string path = parseCmd.at(1); //moguce out_of_range
+        /*izvrsiti provjeru tipa da ne bude create -s nesto u ovom slucaju program kreira datoteku -s*/
         std::ifstream file(path.c_str());
         if(!file.is_open()){
             std::ofstream newFile(path.c_str());
