@@ -10,32 +10,37 @@
 #include<stdexcept> //exception kao i std::out_of_range
 
 //pomocne globalne promjenjive
-
 static short count; 
+static short searching = 0;
 
 //pomocna funkcija
-
 void clearr(){
     system("clear"); //naci alternativu za ovo
 }
 
-
-void validPath(std::string& path){
+bool validPath(std::string& path){
       struct stat myFile;
-    if(stat(path.c_str(), &myFile) < 0){
+    /*if(stat(path.c_str(), &myFile) < 0){
         std::cout<<" Putanja ne postoji!\n";
     }else if(!S_ISDIR(myFile.st_mode)){
         std::cout<<" Putanja nije direktorijum!\n";
-    }
+    }*/
+      if( (stat(path.c_str(), &myFile) < 0) || (!S_ISDIR(myFile.st_mode)) ){
+        std::cout<<" false!\n";
+        return false;
+      }
+      std::cout<<" true!\n";
+      return true;
 }
 
 void tree(std::string& path, const int root){
     //provjera validnosti putanje
     if(!count)
-        validPath(path);
+        if(validPath(path)){
+            std::cout<<" Putanja ne postoji\n";
+            //return; ??
+        }
     count++;
-
-
 
     std::string newPath;
     struct dirent* dp;
@@ -62,9 +67,11 @@ void tree(std::string& path, const int root){
 void search(std::string& path, std::string& key){
     //validacija putanje
     if(!count)
-        validPath(path);
+        if(validPath(path)){
+            std::cout<<" Putanja ne postoji\n";
+            //return; ??
+        }
     count++;
-
 
     std::string newPath;
     struct dirent* dp;
@@ -76,16 +83,18 @@ void search(std::string& path, std::string& key){
         if(strcmp(dp->d_name,".") != 0 && strcmp(dp->d_name,"..") != 0){
             if(dp->d_name == key){ //voditi racuna o mogucem bagu d_name je char*, key je string
                 std::cout<<path<<"\n";
+                searching++;
             }
 
             newPath = path + "/" + dp->d_name;
             search(newPath, key);
         }
     }
+    if(!searching)
+        std::cout<<" Trazena datoteka ne postoji na lokaciji "<<path<<"\n";//trebalo bi da ispise kako treba
 }
 
 //namespace usr
-
 void usr::User::login(){
     
     std::string ime;
@@ -100,11 +109,9 @@ void usr::User::login(){
     std::string userAndPass = ime + " " + lozinka;
     bool found = false;
 
-    //std::ifstream file;
     std::string line;
     try{
-        //file.open("bazaa.txt"); //moguca greska pri otvaranju datoteke baza.txt
-       std::ifstream file("bazaaa.txt");
+       std::ifstream file("baza.txt");
         if(!file)
             throw std::runtime_error(" Greska sa bazom podataka!\n Pokusajte kasnije.\n");
 
@@ -113,23 +120,18 @@ void usr::User::login(){
                 found = true;
             }
         }
+
         file.close();
     }catch(const std::exception& e){
-        //std::cout<<" Greska sa bazom podataka!\n";
         std::cout<<e.what();
         std::cin.ignore(100, '\n'); //ciscenje bafera
         return;
     }
     
-    //file.close();
-    
     if(found){
-
         std::string putanja = "/home/"+ime;
         int check = chdir(putanja.c_str());
 
-        /*ovdje moze doci do greske, recimo da korisnik postoji i loguje se a njegov folder
-        se ne nalazi u /home/ direktorijumu  -- else bi trebao da sprijeci testirati*/
         if(!check){
             char cwd[1024];
             getcwd(cwd,sizeof(cwd));
@@ -139,7 +141,6 @@ void usr::User::login(){
             std::cin.ignore(100, '\n');
             return;
         }
-
 
         this->logged = true;
         this->setName(ime);
@@ -189,6 +190,7 @@ void usr::User::execute(std::vector<std::string>& parseCmd, usr::User& user){
         comm.find(parseCmd, user);
     }else if(!parseCmd.front().compare("findDat")){
         count = 0; //vezano za validaciju putanje
+        searching = 0; //brojac za ispis poruke ako ne nadje datoteku
         comm.findDat(parseCmd, user);
     }else 
         if(!parseCmd.front().compare("logout")){
@@ -228,9 +230,7 @@ void usr::User::setPassword(std::string& password){
     this->password = password;
 }
 
-
 //namespace cmd
-
 void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
 //where - pokazuje trenutno
 
@@ -244,7 +244,7 @@ void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
         return;
     }
 
-    std::cout<<user.getPath()<<"\n"; //izvrsena komanda
+    std::cout<<" "<<user.getPath()<<"\n"; //izvrsena komanda
 }
 
 void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
@@ -259,7 +259,9 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
         std::cout<<" Ispravan unos: go putanja!\n";
         return;
     }
+
     std::string newDir;
+
     try{
         newDir = parseCmd.at(1); //moguce out_of_range
     }catch(const std::out_of_range& oor){
@@ -304,47 +306,54 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
         std::cout<<" Ispravan unos: create [-d] putanja!\n";
         return;
     }
-    
-    if(!opcion.compare("-d")){
-        //kreirati direktorijum
+    /*probaj preko validPath da ides tipa ako je prvi argument validna putanja radi ovo ispod ako nije neka provjerava -d*/
+    /*nemam zivaca za ovu provjeru gore, uradi sa if-om (broj argumente i tjt) sve mozda kasnije srediti*/
+    if(parseCmd.size() == 3){
+
+        if(!opcion.compare("-d")){
+            //kreirati direktorijum
+            try{
+                path = parseCmd.at(2); //moguce out_of_range
+            }catch(const std::out_of_range& oor){
+                std::cout<<" Ispravan unos: create [-d] putanja!\n";
+                return;
+            }
+
+            int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+            if(!check){
+                std::cout<<" Direktorijum je kreiran.\n";
+                return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
+            }else{
+                std::cout<<" Direktorijum nije kreiran.\n Ispravan unos: create [-d] putanja.\n";
+                return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
+            }
+        }else {
+            std::cout<<" Ispravan unos: create [-d] putanja\n";
+        }
+    } else {
+
         try{
-            path = parseCmd.at(2); //moguce out_of_range
+
+            std::string path = parseCmd.at(1); //moguce out_of_range
+            std::ifstream file(path.c_str());
+            if(!file.is_open()){
+                std::ofstream newFile(path.c_str());
+                if(!newFile)
+                    std::runtime_error(" Datoteka nije kreirana.\n Ispravan unos: create [-d] putanja.\n");
+                else
+                    std::cout<<" Datoteka je kreirana.\n";
+            }else{
+                std::cout<<" Datoteka sa tim imenom vec postoji u direktorijumu!\n";
+            }
         }catch(const std::out_of_range& oor){
-            std::cout<<" Ispravan unos: create [-d] putanja!\n";
+            std::cout<<" Ispravan unos: create [-d] putanja\n";
+            return;
+        }catch(const std::exception& e){
+            //std::cout<<" Datoteka nije kreirana\n Ispravan unos: create [-d] putanja\n";
+            std::cout<<e.what();
             return;
         }
-        int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        if(!check){
-            std::cout<<" Direktorijum je kreiran.\n";
-            return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
-        }else{
-            std::cout<<" Direktorijum nije kreiran.\n Ispravan unos: create [-d] putanja.\n";
-            return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
-        }
-    }
-
-
-
-    try{
-        std::string path = parseCmd.at(1); //moguce out_of_range
-        /*izvrsiti provjeru tipa da ne bude create -s nesto u ovom slucaju program kreira datoteku -s*/
-        std::ifstream file(path.c_str());
-        if(!file.is_open()){
-            std::ofstream newFile(path.c_str());
-            if(!newFile)
-                std::runtime_error(" Datoteka nije kreirana.\n Ispravan unos: create [-d] putanja.\n");
-            else
-                std::cout<<" Datoteka je kreirana.\n";
-        }else{
-            std::cout<<" Datoteka sa tim imenom vec postoji u direktorijumu!\n";
-        }
-    }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: create [-d] putanja\n";
-        return;
-    }catch(const std::exception& e){
-        //std::cout<<" Datoteka nije kreirana\n Ispravan unos: create [-d] putanja\n";
-        std::cout<<e.what();
-        return;
     }
 
 }
@@ -367,11 +376,14 @@ void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
     std::string path;
     try{
         path = parseCmd.at(1); //moguce out_of_range
-        tree(path, 0);
+        /*validacija patha*/
+        if(validPath(path))
+            tree(path, 0);
     }catch(const std::out_of_range& oor){
         //ako uhvati out_of_range listaj folder gdje se nalazi
         path = user.getPath();
-        tree(path, 0);
+        if(validPath(path))
+            tree(path, 0);
     }
 }
 
@@ -393,10 +405,9 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
     
     std::string line;
     
-
     try{
         std::string path = user.getPath() + "/" + parseCmd.at(1); //moguci out_of_range
-        std::ifstream infile(path.c_str()); //moguca greska pri otvaranju datoteke
+        std::ifstream infile(path.c_str());
         if(!infile)
             throw std::runtime_error("Greska pri otvaranju datoteke\n Ispravan unos: print datoteka\n");
         
@@ -450,7 +461,6 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
             throw std::runtime_error("Greska pri otvaranju datoteke\n Ispravan unos: print datoteka\n");
         }
 
-
         int pos;
         while(file.good()){
             getline(file,line);
@@ -460,6 +470,7 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
                 return;
             }else{
                 std::cout<<" Trazeni tekst ne postoji u navedenoj datoteci\n";
+                return; //trebalo bi da rijesi problem stampanja vise puta ovog tekst haha
             }
         }
         file.close();
@@ -472,7 +483,6 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
     }
    
 }
-
 
 void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
 //findDat datoteka putanja
@@ -519,7 +529,6 @@ void cmd::Command::logout(std::vector<std::string>& parseCmd, usr::User& user){
 }
 
 //namespace parsing
-
 std::vector<std::string> parsing::parse(const std::string& cmd){
     
     std::vector<std::string> parseCommand;

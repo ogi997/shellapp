@@ -7,29 +7,24 @@ namespace usr{
 
     class User{
     private:
+        bool logged;
         std::string name;
         std::string password;
         std::string path;
-        bool logged;
 
-
-       // bool checkDataBase();
     public:
-        //konstruktor
         User(){this->logged = false;}
 
         void login();
         void setLogged(bool logged);
-        bool getLogged();
-        std::string& getName();
-        std::string& getPassword();
+        void execute(std::vector<std::string>& parseCmd, User& user);
         void setName(std::string& name);
         void setPassword(std::string& password);
         void setPath(std::string& path);
+        bool getLogged();
+        std::string& getPassword();
+        std::string& getName();
         std::string& getPath();
-
-        //za sada void
-        void execute(std::vector<std::string>& parseCmd, User& user);
     };
 }
 
@@ -37,8 +32,7 @@ namespace cmd {
     
     class Command {
     public:
-        //bool login(std::vector<std::string>& parseCmd, usr::User& user);
-        //za sada sve void
+
         void where(std::vector<std::string>& parseCmd,usr::User& user);
         void go(std::vector<std::string>& parseCmd, usr::User& user);
         void create(std::vector<std::string>& parseCmd, usr::User& user);

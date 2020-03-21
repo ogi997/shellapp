@@ -1,13 +1,6 @@
 #include<iostream>
 #include<app.h>
-//#include<unistd.h>
-//#include<cstdlib>
-//#include<fstream>
-//#include<sys/stat.h>
-//#include<dirent.h>
-//#include<sys/types.h>
 #include<algorithm>
-//srediti ove includ
 
 /*
 Author: Ognjen
@@ -19,34 +12,19 @@ makeup:
     pri unosu lozinki da se pojavljuju * (pozeljno)
 
 potencijalni bug:
-    otvaranje fajla preko konstruktora (std::ifstream file(putanja) ) da li ce da uhvati izuzetak try catch
-    ako do njega dodje? potrebno baciti izuzetak i uhvatiti ga sa std::exception
-        trebalo bi da je rjeseno sa if(!file) throw std::runtime_error() i izuzetak std::exception ce da uhvati gresku
-        potrebno testirati
+    list - raditi provjeru putanje
 
 bug:
-    out_of_range izuzetak kod naredbi koje primaju argumente
-        rijeseno - potrebno testirati
-    
-    login prijava korisnika koji nije registrovan na Linux OS (ne postoji njegov direktorijum u /home)
-    
-    create - kada se kreira datoteka, provjeriti da li je kreirana (ne file.is_open()) u slucaju da datoteka
-    postoji otvorice je i ispisace poruku da je datoteka kreirana a nije treba poruka tipa vec postoji datoteka
-    pod tim nazivom
-    moguce rjesenje:
-        ofstream se koristi za kreiranje i pisanje
-        ifstream za citanje iz fajla
-        fstream radi sve sto i prethodna dva
-        ideja: kreirati std::ofstream i std::ifstream objekte pokusati citati iz datoteke ukoliko je moguce
-        fajl postoji i ne moze se kreirati, ukoliko nije moguce citati kreirati dati fajl. moguce uopste?????? efikasno???
-        rijeseno potrebno testirati
+    create - drugi argument moze biti samo -d (ukoliko se navede). Pr create -s putanja kreirace datoteku -s (rijeseno - potrebno testirati)
+    print - smije se samo tekstualna datoteka otvoriti u suprotnom ispisati poruku o gresci (istraziti za Linux)
+    find - kada ne nadje tekst stampa vise puta poruku da tekst ne postoji (rijeseno - potrebno testirati)
+        za unos tipa lozinka123 baza.txt
+                     lozinka12  baza.txt
+                     l          baza.txt ispisuje isto rjesenje (provjeriti da li to tako treba i sta u stvari komanda find treba da radi)
+                     da li se smije uopste jedan karakter poslati kao argument?
+    findDat - nema odgovarajuce poruke ukoliko ne nadje datoteku. (rijeseno - potrebno testirati)
 
-    list, print, find, findDat ne ispisuje odgovarajucu poruku pri pogresnim putanjama
-        print i find rijeseno - testirati
-        rijeseno potrebno testirati
 
-Izvrsiti testiranje shell aplikacije!
-testirati gresku pri otvaranju baza.txt
 
 */
 int main(){
@@ -54,7 +32,6 @@ int main(){
     clearr();
 
     usr::User user; //korisnik
-    //user.setLogged(false); //postavljamo korisnika na offline (probaj preko konstruktora da rijesis ovo)
     
     std::string cmd; //komanda koju unosi
     std::vector<std::string> parseCmd;
@@ -72,13 +49,15 @@ int main(){
         std::getline(std::cin, cmd);
         parseCmd = parsing::parse(cmd);
 
-        if(parseCmd.size() != 0){//ukoliko ste stisne enter (prazan unos) trazice ponovni unos (nece doci do izvrsenja nikakvih komandi)
+    
+        if(parseCmd.size() != 0){//ukoliko se stisne enter (prazan unos) trazice ponovni unos (nece doci do izvrsenja nikakvih komandi)
             it = find(commands.begin(), commands.end(), parseCmd.front());
             if(it != commands.end())
                 user.execute(parseCmd, user);
             else 
                 std::cout<<" Naredba "<<parseCmd.front()<<" ne postoji!\n";
         }
+
     }
 
 return 0;
