@@ -75,6 +75,7 @@ void function::tree(std::string& path, const int root){
             tree(newPath, root+2);
         }
     }
+    closedir(dir); //ogroman bug bio (ovo ga rjesava)
 }
 
 void function::search(std::string& path, std::string& key, int& check){
@@ -97,6 +98,7 @@ void function::search(std::string& path, std::string& key, int& check){
             search(newPath, key, check);
         }
     }
+    closedir(dir); //i ovdje isti bug
 }
 
 std::vector<std::string> function::parse(const std::string& cmd){

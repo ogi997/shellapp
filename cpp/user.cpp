@@ -11,10 +11,10 @@ void usr::User::login(){
     std::string ime;
     std::string lozinka;
 
-    std::cout<<"Korisnicko ime: ";
+    std::cout<<" Korisnicko ime: ";
     std::cin>>ime;
 
-    std::cout<<"Lozinka: ";
+    std::cout<<" Lozinka: ";
     std::cin>>lozinka;
 
     std::string userAndPass = ime + " " + lozinka;
