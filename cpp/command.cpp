@@ -13,7 +13,7 @@ using namespace function; //koristim manje vise sve funkcije ovdje pa uvezi ih s
 void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
 //where - pokazuje trenutno
 
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -29,7 +29,7 @@ void cmd::Command::where(std::vector<std::string>& parseCmd, usr::User& user){
 void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
 //go putanja - mijenja tekuci direktorijum korisnika. 
     
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -67,7 +67,7 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 //ako ga nema onda neka datoteka
 //ako nema putanje kreira u tom folderu u kom se nalazi
 
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -149,7 +149,7 @@ void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
 //izlistava sadrzaj direktorijuma na zadatoj putanji
 //ako nema putanje onda samo sadrzaj tekuceg direktorijuma
   
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -180,7 +180,7 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
 //ispisuje sadrzaj tekstualne datoteke na konzolu
 //ako nije tekstualna ispisati odgovarajucu poruku
 
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -240,7 +240,7 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
 //find "tekst" datoteka
 //pretrazuje sadrzaj datoteka u odnosu na zadati tekst
 
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -296,7 +296,7 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
 //findDat datoteka putanja
 //pretrazuje stablo gdje je root putanja dok ne nadje datoteku
     int check = 0;
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
@@ -311,8 +311,9 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
         std::string file = parseCmd.at(1); //moguce out_of_range
         if(validPath(path)){
             search(path,file, check);
-            if(!check)
+            if(!check){
                 std::cout<<" Trazena datoteka ne postoji u navedenom stablu direktorijuma.\n";
+            }
         }
     }catch(const std::out_of_range& oor){
         std::cout<<" Ispravan unos: findDat datoteka putanja\n";
@@ -323,7 +324,7 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
 void cmd::Command::logout(std::vector<std::string>& parseCmd, usr::User& user){
 //logout komanda, ako korisnik nije prijavljen ne moze se odjaviti u suprotnom moze...
 
-    if(!user.getLogged()){
+    if(!user.isLogged()){
         std::cout<<" Niste prijavljeni!\n";
         return;
     }
