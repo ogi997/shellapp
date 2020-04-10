@@ -7,6 +7,8 @@
 #include<sys/types.h>
 #include<stdexcept> //exception kao i std::out_of_range
 
+#include<algorithm>
+
 using namespace function; //koristim manje vise sve funkcije ovdje pa uvezi ih sve lakse..
 
 //namespace cmd
@@ -61,7 +63,7 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
         std::cout<<" Unijeta putanja ne postoji!\n";
     }
 }
-
+#include<vector>
 void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 //[-d] putanja ako ima -d ide direktorijum
 //ako ga nema onda neka datoteka
@@ -77,59 +79,71 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
         return;
     }
 
+    //code
     std::string path;
-    std::string opcion;
-    try{
-        opcion = parseCmd.at(1); //moguce out_of_range
-    }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: create [-d] putanja\n";
-        return;
-    }
-    
-    if(parseCmd.size() == 3){
 
-        if(!opcion.compare("-d")){
-            //kreirati direktorijum
+    /*  
+        mozda bolja ideja...
+        std::vector<std::string>::iterator it;
+        it = ::std::find(parseCmd.begin(), parseCmd.end(), "-d"); //::rjesava scope i ulazim u std::
+        if(it != parseCmd.end()){ //postoji -d teba kreirati direktorijum
+            int index = std::distance(parseCmd.begin(), it) //nadjem polozaj -d
+            path = parseCmd.at(index + 1); //moguci out_of_range za create -d
+            ...kreiranje direktorijuma
+        }
+        else{ //ako ne nadje -d
+            naci neki efikasniji nacin za kreiranje datoteke 
+        }
+    
+    */
+
+    //provjerava da li treba kreirati direktorijum tj da li se nalazi -d opcija
+    for(int i = 0; i<parseCmd.size(); i++){
+        //std::cout<<parseCmd.at(i)<<"\n";
+        //path = parseCmd.at(i);
+        if(!parseCmd.at(i).compare("-d")){
             try{
-                path = parseCmd.at(2); //moguce out_of_range
+                //std::cout<<i<<"\n";
+                path = parseCmd.at(i + 1);//moguci out_of_range (moze biti i+1 > parseCmd.size())
             }catch(const std::out_of_range& oor){
-                std::cout<<" Ispravan unos: create [-d] putanja\n";
+                std::cout<<" Ispravan unos.\n create [-d] putanja\n";
                 return;
             }
-
+            //unijeta opcija -d uzeta putanja uspjesno sada treba kreirati direktorijum
             int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); //kreiranje direktorijuma
 
             if(!check){
                 std::cout<<" Direktorijum je kreiran.\n";
                 return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
             }else{
-                std::cout<<" Direktorijum nije kreiran.\n Ispravan unos: create [-d] putanja\n";
+                /*moguca greska pri kreiranju je da korisnik nema prava kreiranja novog direktorijuma u datom dir
+                */
+                std::cout<<" Direktorijum nije kreiran.\n Provjerite putanju (ime) direktorijuma\n Direktorijum ne smije da se zove \'/\' \'.\' \'..\' \n";
                 return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
             }
-        }else {
-            std::cout<<" Ispravan unos: create [-d] putanja\n";
         }
-    } else {
+    }
+    //ukoliko ne nadje -d opciju kreiraj datoteku
+    if(parseCmd.size() > 2){
+        std::cout<<" Ispravan unos.\n create [-d] putanja\n";
+        return;
+    }
 
-        try{
-
-            std::string path = parseCmd.at(1); //moguce out_of_range
-            if(path.front() == '-'){ //da se sprijeci kreiranje datoteke create -d vidi nekako ljepse ovo da bude
-                std::cout<<" Ispravan unos: create [-d] putanja\n";
-                return;
+    try{
+        path = parseCmd.at(1); //moguce out_of_range
+        std::ifstream file(path.c_str());
+        if(!file.is_open()){
+            std::ofstream newFile(path.c_str());
+            if(!newFile){
+                std::runtime_error(" Datoteka nije kreirana.\n Ispravan unos: create [-d] putanja\n");
             }
-            std::ifstream file(path.c_str());
-            if(!file.is_open()){
-                std::ofstream newFile(path.c_str());
-                if(!newFile){
-                    std::runtime_error(" Datoteka nije kreirana.\n Ispravan unos: create [-d] putanja\n");
-                }
-                else{
-                    std::cout<<" Datoteka je kreirana.\n";//zavrseno je kreiranje datoteke funkcija ce sama da izadje nije potrebno return
-                	newFile.close(); //zatvaramo datoteku kada je kreiramo
-                }
-            }else{
-                std::cout<<" Datoteka sa tim imenom vec postoji u direktorijumu.\n";
+            else{
+                std::cout<<" Datoteka je kreirana.\n";//zavrseno je kreiranje datoteke funkcija ce sama da izadje nije potrebno return
+                newFile.close(); //zatvaramo datoteku kada je kreiramo
+            }
+            }
+            else{
+                std::cout<<" Provjerite putanju (ime) datoteke.\n Datoteka ne smije da se zove \'/\' \'.\' \'..\' \n";
                 file.close(); //zatvaramo datoteku jer nam ne treba
             }
         }catch(const std::out_of_range& oor){
@@ -140,8 +154,6 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
             std::cout<<e.what();
             return;
         }
-    }
-
 }
 
 void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
@@ -272,6 +284,7 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
         int pos;
         while(file.good()){
             getline(file,line);
+            //ovdje provjeri da li se trazi string u stringu ili...
             pos = line.find(search.c_str());
             if(pos != std::string::npos){
                 std::cout<<" Tekst pronadjen"<<" na "<<pos+1<<" poziciji.\n";

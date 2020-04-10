@@ -7,10 +7,11 @@
 Author: Ognjen
 Project: OOS Project Shell app
 OS: Linux Ubuntu
-Version: 5.0
+Version: 6.0
 
 makeup:
-   bolji nacin za izvrsavanje komande create
+   smisljenja dva nova nacina za izvrsavanje komande create preko std::find i preko for petlje
+   doraditi jedan od ta dva
 
 potencijalni bug:
     /

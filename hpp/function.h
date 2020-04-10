@@ -11,7 +11,6 @@ namespace function{
     void search(std::string& path, std::string& key, int& check);
     bool validPath(std::string& path);
     bool isFileEmpty(std::ifstream& file);
-
     void program(usr::User& user);
 
 }

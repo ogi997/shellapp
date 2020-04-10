@@ -15,7 +15,7 @@ void function::program(usr::User& user){
 
     std::string cmd; //komanda koju unosi
     std::vector<std::string> parseCmd;
-    std::vector<std::string> commands = {"login", "where", "go", "create", "list", "print", "find", "findDat", "logout"}; //moguce komande
+    std::vector<std::string> commands = {"login", "where", "go", "create", "list", "print", "find", "findDat", "logout", "exit"}; //moguce komande
     std::vector<std::string>::iterator it;
 
     if(user.isLogged() == false){
