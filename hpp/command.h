@@ -13,5 +13,6 @@ namespace cmd {
         void find(std::vector<std::string>& parseCmd, usr::User& user);
         void findDat(std::vector<std::string>& parseCmd, usr::User& user);
         void logout(std::vector<std::string>& parseCmd, usr::User& user);
+	    void exit(std::vector<std::string>& parseCmd, usr::User& user);
     };
 }

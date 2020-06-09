@@ -117,6 +117,8 @@ void usr::User::execute(std::vector<std::string>& parseCmd, usr::User& user){
     }
     else if(!parseCmd.front().compare("logout")){
         comm.logout(parseCmd, user);
+    }else if(!parseCmd.front().compare("exit")){
+        comm.exit(parseCmd, user);
     }
 }
 

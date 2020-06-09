@@ -79,7 +79,7 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
 //code
-    for(unsigned it = 0; it<parseCmd.size(); it++){
+    for(int it = 0; it<parseCmd.size(); it++){
         if(parseCmd.at(it)[0] == '-'){
             if(parseCmd.at(it) == "-d"){ //parseCmd.at(it).compare("-d") == 0
                 try{
@@ -275,7 +275,7 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
             return;//prekini sa izvrsavanjem funkcije
         }
 
-        signed pos; //int
+        int pos; //int
         int vrsta = 0;
         int temp = 0;
         while(file.good()){
@@ -351,4 +351,16 @@ void cmd::Command::logout(std::vector<std::string>& parseCmd, usr::User& user){
     user.setLogged(false);
     std::cout<<" "<<user.getName()<<" se odjavljuje.\n";
     sleep(2);
+}
+
+void cmd::Command::exit(std::vector<std::string>& parseCmd, usr::User& user){
+	if(parseCmd.size() > 1){
+		std::cout<<" Komanda exit nema argumente\n";
+		return;
+	}
+	if(user.isLogged()){
+		std::cout<<" Da bi izasli iz programa morate se odjaviti pomocu komande logout\n";
+		return;
+	}
+	::std::exit(0);
 }

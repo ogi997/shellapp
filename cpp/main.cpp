@@ -7,17 +7,16 @@
 Author: Ognjen
 Project: OOS Project Shell app
 OS: Linux Ubuntu
-Version: 7.0
+Version: 0.8.0
 
 makeup:
-    skontati za komandu find kako treba da funkcionise
-    kod komande create da li treba voditi racuna o privilegijama ???
+    /
 
 potencijalni bug:
     /
 
 bug:
-    ponovo testirati aplikaciju
+    Testirati aplikaciju
 
 */
 

@@ -57,7 +57,7 @@ std::string function::getExtension(std::string& path){
     /*
         trazi . u stringu (zadnju sa desne strane) i uzima sve desno od nje
     */
-    unsigned pos = path.rfind('.', path.length()); //int
+    int pos = path.rfind('.', path.length()); //int
     if( pos != std::string::npos ){
         return (path.substr(pos+1, path.length() - pos));
     }
@@ -156,7 +156,7 @@ std::vector<std::string> function::parse(std::string& cmd){
 //funkcija za validaciju parsiranja
 std::vector<std::string> function::parseValidation(std::vector<std::string>& v){
 
-    for(unsigned i = 0; i<v.size(); i++){
+    for(int i = 0; i<v.size(); i++){
             try{
                 int size = strlen(v.at(i).c_str());
                 if(v.at(i)[size - 1] == '\\'){
