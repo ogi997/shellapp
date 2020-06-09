@@ -5,6 +5,7 @@ class User{};
 namespace function{
     
     std::vector<std::string> parse(std::string& cmd);
+    std::vector<std::string> parseValidation(std::vector<std::string>& v);
     std::string getExtension(std::string& path);
     void clearr();
     void tree(std::string& path, int root);

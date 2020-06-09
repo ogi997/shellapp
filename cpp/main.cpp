@@ -7,17 +7,16 @@
 Author: Ognjen
 Project: OOS Project Shell app
 OS: Linux Ubuntu
-Version: 6.0
+Version: 7.0
 
 makeup:
-   smisljenja dva nova nacina za izvrsavanje komande create preko std::find i preko for petlje
-   doraditi jedan od ta dva
+    skontati za komandu find kako treba da funkcionise
+    kod komande create da li treba voditi racuna o privilegijama ???
 
 potencijalni bug:
     /
 
 bug:
-    popravljeni svi bug koji su bili nadjeni
     ponovo testirati aplikaciju
 
 */

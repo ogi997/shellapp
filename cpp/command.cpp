@@ -6,7 +6,6 @@
 #include<sys/stat.h>
 #include<sys/types.h>
 #include<stdexcept> //exception kao i std::out_of_range
-
 #include<algorithm>
 
 using namespace function; //koristim manje vise sve funkcije ovdje pa uvezi ih sve lakse..
@@ -37,7 +36,7 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 2){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: go putanja!\n";
+        std::cout<<" Naveli ste nepotrebne argumente.\n Ispravan unos: go putanja!\n";
         return;
     }
 
@@ -47,7 +46,7 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
         newDir = parseCmd.at(1); //moguce out_of_range
 
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: go putanja\n";
+        std::cout<<" Niste naveli putanju.\n Ispravan unos: go putanja\n";
         return;
     }
 
@@ -63,7 +62,7 @@ void cmd::Command::go(std::vector<std::string>& parseCmd, usr::User& user){
         std::cout<<" Unijeta putanja ne postoji!\n";
     }
 }
-#include<vector>
+
 void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
 //[-d] putanja ako ima -d ide direktorijum
 //ako ga nema onda neka datoteka
@@ -75,62 +74,47 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 3){ //u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: create [-d] putanja\n";
+        std::cout<<" Naveli ste nepotrebne argumente.\n Ispravan unos: create [-d] putanja\n";
         return;
     }
 
-    //code
-    std::string path;
+//code
+    for(unsigned it = 0; it<parseCmd.size(); it++){
+        if(parseCmd.at(it)[0] == '-'){
+            if(parseCmd.at(it) == "-d"){ //parseCmd.at(it).compare("-d") == 0
+                try{
+                    std::string path = parseCmd.at(it + 1); //moguci out_of_range
+                    
+                    int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); //kreiranje direktorijuma
 
-    /*  
-        mozda bolja ideja...
-        std::vector<std::string>::iterator it;
-        it = ::std::find(parseCmd.begin(), parseCmd.end(), "-d"); //::rjesava scope i ulazim u std::
-        if(it != parseCmd.end()){ //postoji -d teba kreirati direktorijum
-            int index = std::distance(parseCmd.begin(), it) //nadjem polozaj -d
-            path = parseCmd.at(index + 1); //moguci out_of_range za create -d
-            ...kreiranje direktorijuma
-        }
-        else{ //ako ne nadje -d
-            naci neki efikasniji nacin za kreiranje datoteke 
-        }
-    
-    */
-
-    //provjerava da li treba kreirati direktorijum tj da li se nalazi -d opcija
-    for(int i = 0; i<parseCmd.size(); i++){
-        //std::cout<<parseCmd.at(i)<<"\n";
-        //path = parseCmd.at(i);
-        if(!parseCmd.at(i).compare("-d")){
-            try{
-                //std::cout<<i<<"\n";
-                path = parseCmd.at(i + 1);//moguci out_of_range (moze biti i+1 > parseCmd.size())
-            }catch(const std::out_of_range& oor){
-                std::cout<<" Ispravan unos.\n create [-d] putanja\n";
+                    if(!check){
+                        std::cout<<" Direktorijum je kreiran.\n";
+                        return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
+                    }else{
+                        /*moguca greska pri kreiranju je da korisnik nema prava kreiranja novog direktorijuma u datom dir
+                        */
+                        std::cout<<" Direktorijum nije kreiran.\n Provjerite putanju (ime) direktorijuma\n Direktorijum ne smije da se zove \'/\' \'.\' \'..\' \n";
+                        return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
+                    }
+                }catch(std::out_of_range& oor){
+                    std::cout<<" Argumenti nisu dobro navedeni\n Ispravan unos: create [-d] putanja\n";
+                    return;
+                }
+            }else {
+                std::cout<<" Argument "<< parseCmd.at(it)<< " ne postoji\n";
                 return;
             }
-            //unijeta opcija -d uzeta putanja uspjesno sada treba kreirati direktorijum
-            int check = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); //kreiranje direktorijuma
-
-            if(!check){
-                std::cout<<" Direktorijum je kreiran.\n";
-                return; //direktorijum je kreiran naredba prestaje sa izvrsenjem
-            }else{
-                /*moguca greska pri kreiranju je da korisnik nema prava kreiranja novog direktorijuma u datom dir
-                */
-                std::cout<<" Direktorijum nije kreiran.\n Provjerite putanju (ime) direktorijuma\n Direktorijum ne smije da se zove \'/\' \'.\' \'..\' \n";
-                return; //neuspjesno kreiranje direktorijuma vratiti korisnika na kom. liniju
-            }
         }
-    }
-    //ukoliko ne nadje -d opciju kreiraj datoteku
-    if(parseCmd.size() > 2){
-        std::cout<<" Ispravan unos.\n create [-d] putanja\n";
-        return;
     }
 
     try{
-        path = parseCmd.at(1); //moguce out_of_range
+        std::string path;
+        if(parseCmd.size() - 1 > 0 && parseCmd.size() < 3){
+            path = parseCmd.at(parseCmd.size() - 1);
+        }
+        else{
+            std::cout<<" Ispravan unos: create [-d] putanja\n";
+        }
         std::ifstream file(path.c_str());
         if(!file.is_open()){
             std::ofstream newFile(path.c_str());
@@ -141,19 +125,18 @@ void cmd::Command::create(std::vector<std::string>& parseCmd, usr::User& user){
                 std::cout<<" Datoteka je kreirana.\n";//zavrseno je kreiranje datoteke funkcija ce sama da izadje nije potrebno return
                 newFile.close(); //zatvaramo datoteku kada je kreiramo
             }
-            }
-            else{
-                std::cout<<" Provjerite putanju (ime) datoteke.\n Datoteka ne smije da se zove \'/\' \'.\' \'..\' \n";
-                file.close(); //zatvaramo datoteku jer nam ne treba
-            }
-        }catch(const std::out_of_range& oor){
-
-            std::cout<<" Ispravan unos: create [-d] putanja\n";
-            return;
-        }catch(const std::exception& e){
-            std::cout<<e.what();
-            return;
+        }else{
+            std::cout<<" Provjerite putanju (ime) datoteke.\n Datoteka ne smije da se zove \'/\' \'.\' \'..\' \n";
+            file.close(); //zatvaramo datoteku jer nam ne treba
         }
+        return;
+    }catch(const std::out_of_range& oor){
+        std::cout<<" Argumenti nisu dobro navedeni\n Ispravan unos: create [-d] putanja\n";
+        return;
+    }catch(const std::exception& e){
+        std::cout<<" "<<e.what()<<"\n";
+        return;
+    }
 }
 
 void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
@@ -167,7 +150,7 @@ void cmd::Command::list(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 2){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: list [putanja]\n";
+        std::cout<<" Naveli ste nepotrebne argumente\n Ispravan unos: list [putanja]\n";
         return;
     }
 
@@ -198,7 +181,7 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 2){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: print datoteka\n";
+        std::cout<<" Naveli ste nepotrebne argumente\n Ispravan unos: print datoteka\n";
         return;
     }
 
@@ -207,9 +190,16 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
     try{
         std::string path = user.getPath() + "/" + parseCmd.at(1); //moguci out_of_range
 
+         //provjera da li je datoteka tekstualna
+        std::string ext = getExtension(path);
+        if(ext.compare("txt")){
+            std::cout<<" Datoteka nije tekstualna.\n";
+            return;
+        }
+
         std::ifstream infile(path.c_str());
         if(!infile){
-            throw std::runtime_error("Greska pri otvaranju datoteke.\n Ispravan unos: print datoteka\n");
+            throw std::runtime_error(" Greska pri otvaranju datoteke.\n Ispravan unos: print datoteka\n");
         }
         
         //validacija da li je uopste navedena datoteka
@@ -220,12 +210,6 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
             return;
         }
         
-         //provjera da li je datoteka tekstualna
-        std::string ext = getExtension(path);
-        if(ext.compare("txt")){
-            std::cout<<" Datoteka nije tekstualna.\n";
-            return;
-        }
 
         //provjera da li je datoteka prazna
         if(isFileEmpty(infile)){
@@ -240,7 +224,7 @@ void cmd::Command::print(std::vector<std::string>& parseCmd, usr::User& user){
         infile.close();//zatvaranje datoteke kada se zavrsi sa radom
               
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: print datoteka\n";
+        std::cout<<" Niste naveli ispravnu datoteku\n Ispravan unos: print datoteka\n";
         return;
     }catch(const std::exception& ex){
         std::cout<<ex.what();
@@ -258,9 +242,14 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 3){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: find \"tekst\" datoteka\n";
+        std::cout<<" Naveli ste nepotrebne argumente \n Ispravan unos: find \"tekst\" datoteka\n";
         return;
     }
+
+
+    /* komanda ispod ce da obrise " iz teksta koji se trazi, samo skontati sta ova komanda treba u stvari da radi */
+    //nesto.erase(std::remove(nesto.begin(), nesto.end(), '"'), nesto.end());
+
 
     std::string path;
     std::string search;
@@ -268,11 +257,16 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
 
     try{
         search = parseCmd.at(1);//moguce out_of_range
+        if(search[0] != '"' || search[search.size() - 1] != '"'){
+        	std::cout<<" Neispravan unos argumenta za pretragu\n Ispravan unos: find \"tekst\" datoteka\n";
+        	return;
+        }
+        search.erase(std::remove(search.begin(), search.end(), '"'), search.end()); //remove-erase idom brise " u tekstu
         path = parseCmd.at(2); //moguce out_of_range
         std::ifstream file(path.c_str());
         
         if(!file){
-            throw std::runtime_error(" Greska pri otvaranju datoteke.\n Ispravan unos: print datoteka\n");
+            throw std::runtime_error(" Greska pri otvaranju datoteke.\n Ispravan unos: find \"tekst\" datoteka\n");
         }
 
         //provjera da li je datoteka prazna
@@ -281,22 +275,29 @@ void cmd::Command::find(std::vector<std::string>& parseCmd, usr::User& user){
             return;//prekini sa izvrsavanjem funkcije
         }
 
-        int pos;
+        signed pos; //int
+        int vrsta = 0;
+        int temp = 0;
         while(file.good()){
             getline(file,line);
             //ovdje provjeri da li se trazi string u stringu ili...
             pos = line.find(search.c_str());
             if(pos != std::string::npos){
-                std::cout<<" Tekst pronadjen"<<" na "<<pos+1<<" poziciji.\n";
+                std::cout<<" Rezultat: " << vrsta + 1 << "\n";
+                temp++;
                 return;
-            }else{
-                std::cout<<" Trazeni tekst ne postoji u navedenoj datoteci.\n";
-                return; //trebalo bi da rijesi problem stampanja vise puta ovog tekst haha
             }
+            vrsta++;
         }
+
+        if(!temp){
+        	std::cout<<" Trazeni tekst ne postoji u datoteci\n";
+        	return;
+        }
+
         file.close(); //zatvaranje datoteke kada se zavrsi sa radom
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: find \"tekst\" datoteka\n";
+        std::cout<<" Nisu navedeni potrebni argumenti.\n Ispravan unos: find \"tekst\" datoteka\n";
         return;
     }catch(const std::exception& ex){
         std::cout<<ex.what();
@@ -315,7 +316,7 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
     }
 
     if(parseCmd.size() > 3){//u slucaju unosa nepotrebnih argumenata
-        std::cout<<" Ispravan unos: findDat datoteka putanja\n";
+        std::cout<<" Navedeni su nepotrebni argumnti.\n Ispravan unos: findDat datoteka putanja\n";
         return;
     }
 
@@ -329,7 +330,7 @@ void cmd::Command::findDat(std::vector<std::string>& parseCmd, usr::User& user){
             }
         }
     }catch(const std::out_of_range& oor){
-        std::cout<<" Ispravan unos: findDat datoteka putanja\n";
+        std::cout<<" Nisu navedeni potrebni argumenti.\n Ispravan unos: findDat datoteka putanja\n";
         return;
     }
 }

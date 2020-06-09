@@ -27,6 +27,7 @@ void function::program(usr::User& user){
 
     std::getline(std::cin, cmd);
     parseCmd = function::parse(cmd); //parsiranje naredbe
+    parseCmd = function::parseValidation(parseCmd); //vrsi se validacija parsiranja
 
     if(parseCmd.size() != 0){ //ukoliko se stisne enter (prazan unos) trazice ponovni unos (nece doci do izvrsenja nikakvih komandi)
 
@@ -56,7 +57,7 @@ std::string function::getExtension(std::string& path){
     /*
         trazi . u stringu (zadnju sa desne strane) i uzima sve desno od nje
     */
-    short pos = path.rfind('.', path.length());
+    unsigned pos = path.rfind('.', path.length()); //int
     if( pos != std::string::npos ){
         return (path.substr(pos+1, path.length() - pos));
     }
@@ -133,6 +134,7 @@ void function::search(std::string& path, std::string& key, int& check){
     closedir(dir); //i ovdje isti bug
 }
 
+//funkcija za parsiranje
 std::vector<std::string> function::parse(std::string& cmd){
 
     std::vector<std::string> parseCommand;
@@ -140,8 +142,8 @@ std::vector<std::string> function::parse(std::string& cmd){
         return std::vector<std::string>(); //vratice prazan vector
     }
 
-    int start;
-    int end = 0;
+    size_t start;
+    size_t end = 0;
 
     while((start = cmd.find_first_not_of(' ', end)) != std::string::npos){
         end = cmd.find(' ', start);
@@ -149,4 +151,32 @@ std::vector<std::string> function::parse(std::string& cmd){
     }
 
     return parseCommand;
+}
+
+//funkcija za validaciju parsiranja
+std::vector<std::string> function::parseValidation(std::vector<std::string>& v){
+
+    for(unsigned i = 0; i<v.size(); i++){
+            try{
+                int size = strlen(v.at(i).c_str());
+                if(v.at(i)[size - 1] == '\\'){
+                    if(i < v.size()){
+                        v.at(i)= v.at(i) + " " + v.at(i+1);
+                        if(!v.empty())
+                            v.erase(v.begin()+i+1);
+                    }
+                }
+            }catch(std::out_of_range& oor){
+                std::cout<<" Greska kod navodjenja putanje.\n";
+                return std::vector<std::string>(); //doslo je do greske pri validaciji vecktora nesto nije dobro prekiniti sve
+            }
+        }
+
+        /*prije vracanja ovog vectora treba izbaciti sve \ iz elemenata jer mijenjaju pravo ime fajlova i dokumenata*/
+        for (auto& str : v) {
+            str.erase(std::remove(str.begin(), str.end(), '\\'), str.end());
+        }
+
+        //vecktor je validan i vraca se
+        return v;
 }
